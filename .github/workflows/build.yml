@@ -1,0 +1,44 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build
+        shell: pwsh
+        run: |
+          $version = '1.0.0'
+          if ($env:GITHUB_REF -like 'refs/tags/v*') { $version = $env:GITHUB_REF_NAME.TrimStart('v') }
+          dotnet build -c Release -p:Version=$version
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: TaskbarPlayer
+          path: bin/Release/net48/TaskbarPlayer.exe
+
+      - name: Publish release
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag = $env:GITHUB_REF_NAME
+          $exe = 'bin/Release/net48/TaskbarPlayer.exe'
+          gh release view $tag *> $null
+          if ($LASTEXITCODE -eq 0) {
+            gh release upload $tag $exe --clobber
+          } else {
+            gh release create $tag $exe --title "Taskbar Player $tag" --generate-notes
+          }
