@@ -26,8 +26,12 @@ internal static class AppConfig
     public const float FontSizePx = 12f;
     /// <summary>Horizontal text padding inside the plaque, DIP.</summary>
     public const float PaddingDip = 8f;
-    /// <summary>Button icon size (Segoe MDL2 Assets) in pixels at 96 DPI.</summary>
-    public const float GlyphSizePx = 12f;
+    /// <summary>Button icon size (Segoe MDL2 Assets) in pixels at 96 DPI; 16 px is the font's native grid, like tray icons.</summary>
+    public const float GlyphSizePx = 16f;
+    /// <summary>Coverage-to-alpha gamma for white text (dark taskbar): above 1 makes strokes as solid as system text.</summary>
+    public const float TextGammaDarkTheme = 1.4f;
+    /// <summary>Same for black text (light taskbar).</summary>
+    public const float TextGammaLightTheme = 1.0f;
 
     /// <summary>Taskbar geometry check (safety net for the WinEvent hooks).</summary>
     public const int LayoutCheckIntervalMs = 1000;

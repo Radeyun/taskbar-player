@@ -305,6 +305,42 @@ internal static class Native
     public static extern IntPtr CreateDIBSection(IntPtr hdc, ref BITMAPINFOHEADER pbmi, uint usage,
         out IntPtr ppvBits, IntPtr hSection, uint offset);
 
+    // ---- gdi32/user32: hinted GDI text (rendered into a coverage mask) ----
+    public const int ANTIALIASED_QUALITY = 4;
+    public const int FW_NORMAL = 400;
+    public const int DEFAULT_CHARSET = 1;
+    public const int TRANSPARENT = 1;
+    public const uint DT_CENTER = 0x0001;
+    public const uint DT_RIGHT = 0x0002;
+    public const uint DT_VCENTER = 0x0004;
+    public const uint DT_SINGLELINE = 0x0020;
+    public const uint DT_NOPREFIX = 0x0800;
+    public const uint DT_END_ELLIPSIS = 0x8000;
+
+    [DllImport("gdi32.dll", CharSet = CharSet.Unicode)]
+    public static extern IntPtr CreateFont(int cHeight, int cWidth, int cEscapement, int cOrientation, int cWeight,
+        uint bItalic, uint bUnderline, uint bStrikeOut, uint iCharSet, uint iOutPrecision, uint iClipPrecision,
+        uint iQuality, uint iPitchAndFamily, string pszFaceName);
+
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+    public static extern int DrawText(IntPtr hdc, string lpchText, int cchText, ref RECT lprc, uint format);
+
+    [DllImport("gdi32.dll")]
+    public static extern int SetBkMode(IntPtr hdc, int mode);
+
+    [DllImport("gdi32.dll")]
+    public static extern uint SetTextColor(IntPtr hdc, int color);
+
+    [DllImport("gdi32.dll")]
+    public static extern int IntersectClipRect(IntPtr hdc, int left, int top, int right, int bottom);
+
+    [DllImport("gdi32.dll")]
+    public static extern int SaveDC(IntPtr hdc);
+
+    [DllImport("gdi32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool RestoreDC(IntPtr hdc, int nSavedDC);
+
     // ---- WinEvent hooks (out-of-context: no DLL injection) ----
     [DllImport("user32.dll")]
     public static extern IntPtr SetWinEventHook(uint eventMin, uint eventMax, IntPtr hmodWinEventProc,

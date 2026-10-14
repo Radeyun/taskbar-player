@@ -202,7 +202,7 @@ internal sealed class TrayApp : ApplicationContext
         _plaque.SetTool(4, layout.Next, enabled ? "Next track" : "");
 
         float scale = _host.Scale;
-        return _plaque.Present(g => PlaqueRenderer.Draw(g, layout, scale, visual));
+        return _plaque.Present((g, bits) => PlaqueRenderer.Draw(g, bits, layout, scale, visual));
     }
 
     // ---------- Mouse ----------

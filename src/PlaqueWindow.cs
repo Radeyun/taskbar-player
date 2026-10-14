@@ -87,7 +87,7 @@ internal sealed class PlaqueWindow : NativeWindow, IDisposable
     /// Draws the content: GDI+ paints straight into a 32-bit DIB (premultiplied ARGB),
     /// which is then handed to UpdateLayeredWindow.
     /// </summary>
-    public bool Present(Action<Graphics> draw)
+    public bool Present(Action<Graphics, IntPtr> draw)
     {
         if (!IsAlive || Size.Width <= 0 || Size.Height <= 0) return false;
 
@@ -112,7 +112,7 @@ internal sealed class PlaqueWindow : NativeWindow, IDisposable
             using (var bmp = new Bitmap(w, h, w * 4, PixelFormat.Format32bppPArgb, bits))
             using (var g = Graphics.FromImage(bmp))
             {
-                draw(g);
+                draw(g, bits); // the renderer also writes pixels directly into the DIB
                 g.Flush(System.Drawing.Drawing2D.FlushIntention.Sync);
             }
 
