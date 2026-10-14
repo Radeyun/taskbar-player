@@ -60,6 +60,8 @@ Windows 11 has a different taskbar. The app should fall back to an overlay windo
 | Option | Meaning |
 |---|---|
 | `--width=300` | Width of the title area in pixels at 100% scale (default 260; the three buttons add 90) |
+| `--font="Segoe UI"` | Title font (default `Segoe UI Semilight`, which matches the taskbar clock) |
+| `--gamma=1.0` | Title stroke weight on a dark taskbar: lower is thinner (default 1.4) |
 | `--portable` | Never offer to install |
 | `--log` | Write diagnostics to `%LOCALAPPDATA%\TaskbarPlayer\error.log` (crashes are always logged there) |
 | `--fallback` | Don't embed into the taskbar, use the overlay window instead |

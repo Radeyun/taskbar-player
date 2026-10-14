@@ -1,6 +1,8 @@
+using System.Globalization;
+
 namespace TaskbarPlayer;
 
-/// <summary>App settings. The title width can be overridden with --width=300.</summary>
+/// <summary>App settings. Some can be overridden from the command line (see README).</summary>
 internal static class AppConfig
 {
     /// <summary>Width of the title area in DIP (= pixels at 100% scale); scaled by the taskbar DPI.</summary>
@@ -21,15 +23,16 @@ internal static class AppConfig
     /// <summary>Never offer to install, just run from the current location (--portable).</summary>
     public static bool Portable { get; private set; }
 
-    public const string FontFamily = "Segoe UI";
+    /// <summary>Title font (--font="Segoe UI"). Semilight matches the weight of the taskbar clock at 9 pt.</summary>
+    public static string FontFamily { get; private set; } = "Segoe UI Semilight";
     /// <summary>Font size in pixels at 96 DPI (12 px = 9 pt, same as the taskbar clock).</summary>
     public const float FontSizePx = 12f;
     /// <summary>Horizontal text padding inside the plaque, DIP.</summary>
     public const float PaddingDip = 8f;
-    /// <summary>Button icon size (Segoe MDL2 Assets) in pixels at 96 DPI; 16 px is the font's native grid, like tray icons.</summary>
-    public const float GlyphSizePx = 16f;
-    /// <summary>Coverage-to-alpha gamma for white text (dark taskbar): above 1 makes strokes as solid as system text.</summary>
-    public const float TextGammaDarkTheme = 1.4f;
+    /// <summary>Button icon size (Segoe MDL2 Assets) in pixels at 96 DPI.</summary>
+    public const float GlyphSizePx = 14f;
+    /// <summary>Coverage-to-alpha gamma for white text (dark taskbar), --gamma=1.2: above 1 makes strokes heavier.</summary>
+    public static float TextGammaDarkTheme { get; private set; } = 1.4f;
     /// <summary>Same for black text (light taskbar).</summary>
     public const float TextGammaLightTheme = 1.0f;
 
@@ -62,6 +65,16 @@ internal static class AppConfig
             else if (arg.Equals("--fallback", StringComparison.OrdinalIgnoreCase))
             {
                 ForceFallback = true;
+            }
+            else if (arg.StartsWith("--font=", StringComparison.OrdinalIgnoreCase))
+            {
+                string face = arg.Substring("--font=".Length).Trim().Trim('"');
+                if (face.Length > 0) FontFamily = face;
+            }
+            else if (arg.StartsWith("--gamma=", StringComparison.OrdinalIgnoreCase) &&
+                     float.TryParse(arg.Substring("--gamma=".Length), NumberStyles.Float, CultureInfo.InvariantCulture, out float gamma))
+            {
+                TextGammaDarkTheme = Compat.Clamp(gamma, 0.5f, 3f);
             }
             else if (arg.Equals("--portable", StringComparison.OrdinalIgnoreCase))
             {
