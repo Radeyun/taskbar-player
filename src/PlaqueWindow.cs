@@ -14,6 +14,7 @@ internal sealed class PlaqueWindow : NativeWindow, IDisposable
     private IntPtr _tooltip;
     private readonly Dictionary<int, (Rectangle Rect, string Text)> _tools = new();
     private bool _trackingLeave;
+    private bool _tooltipSuppressed;
 
     public PlaqueWindow(IntPtr tooltipOwner) => _tooltipOwner = tooltipOwner;
 
@@ -167,6 +168,29 @@ internal sealed class PlaqueWindow : NativeWindow, IDisposable
 
         _tools.Clear();
         SendMessage(_tooltip, TTM_SETMAXTIPWIDTH, IntPtr.Zero, new IntPtr(800));
+        // Longer hover delay than the default ~0.5 s, so the tooltip doesn't pop up over the title on a quick pass
+        SendMessage(_tooltip, TTM_SETDELAYTIME, new IntPtr(TTDT_INITIAL), new IntPtr(AppConfig.TooltipDelayMs));
+        SendMessage(_tooltip, TTM_SETDELAYTIME, new IntPtr(TTDT_RESHOW), new IntPtr(AppConfig.TooltipDelayMs / 2));
+        _tooltipSuppressed = false;
+    }
+
+    /// <summary>
+    /// Hides the tooltip and keeps it hidden until the cursor leaves the plaque:
+    /// while the user scrolls or clicks, it would only cover the title they are looking at.
+    /// </summary>
+    private void SuppressTooltip()
+    {
+        if (_tooltip == IntPtr.Zero || _tooltipSuppressed) return;
+        SendMessage(_tooltip, TTM_POP, IntPtr.Zero, IntPtr.Zero);
+        SendMessage(_tooltip, TTM_ACTIVATE, IntPtr.Zero, IntPtr.Zero);
+        _tooltipSuppressed = true;
+    }
+
+    private void RestoreTooltip()
+    {
+        if (_tooltip == IntPtr.Zero || !_tooltipSuppressed) return;
+        SendMessage(_tooltip, TTM_ACTIVATE, new IntPtr(1), IntPtr.Zero);
+        _tooltipSuppressed = false;
     }
 
     // TTF_SUBCLASS: the tooltip intercepts the plaque's mouse messages itself; each tool is a rectangle
@@ -223,10 +247,12 @@ internal sealed class PlaqueWindow : NativeWindow, IDisposable
                 return;
             case WM_MOUSELEAVE:
                 _trackingLeave = false;
+                RestoreTooltip();
                 MouseLeft?.Invoke();
                 return;
             case WM_LBUTTONDOWN:
             case WM_LBUTTONDBLCLK: // fast repeated clicks on a button must not get lost
+                SuppressTooltip();
                 SetCapture(Handle); // so we get WM_LBUTTONUP even if the button is released outside
                 LeftDown?.Invoke(PointFromLParam(m.LParam));
                 return;
@@ -235,12 +261,15 @@ internal sealed class PlaqueWindow : NativeWindow, IDisposable
                 LeftUp?.Invoke(PointFromLParam(m.LParam));
                 return;
             case WM_MBUTTONUP:
+                SuppressTooltip();
                 MiddleClick?.Invoke();
                 return;
             case WM_RBUTTONUP:
+                SuppressTooltip();
                 RightClick?.Invoke();
                 return;
             case WM_MOUSEWHEEL:
+                SuppressTooltip();
                 // High word of wParam is the wheel delta (a multiple of 120 per notch)
                 Wheel?.Invoke((short)((m.WParam.ToInt64() >> 16) & 0xFFFF));
                 return;

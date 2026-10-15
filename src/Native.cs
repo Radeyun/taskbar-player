@@ -66,7 +66,12 @@ internal static class Native
     public const int TTS_ALWAYSTIP = 0x01;
     public const int TTS_NOPREFIX = 0x02;
     public const uint TTF_SUBCLASS = 0x0010;
+    public const int TTM_ACTIVATE = WM_USER + 1;
+    public const int TTM_SETDELAYTIME = WM_USER + 3;
     public const int TTM_SETMAXTIPWIDTH = WM_USER + 24;
+    public const int TTM_POP = WM_USER + 28;
+    public const int TTDT_RESHOW = 1;
+    public const int TTDT_INITIAL = 3;
     public const int TTM_ADDTOOLW = WM_USER + 50;
     public const int TTM_NEWTOOLRECTW = WM_USER + 52;
     public const int TTM_UPDATETIPTEXTW = WM_USER + 57;

@@ -40,6 +40,8 @@ internal static class AppConfig
     public const int LayoutCheckIntervalMs = 1000;
     /// <summary>Safety-net media poll (updates normally arrive as events).</summary>
     public const int MediaPollIntervalMs = 2000;
+    /// <summary>Hover time before the full-title tooltip appears.</summary>
+    public const int TooltipDelayMs = 1500;
     /// <summary>How long "Copied" stays on screen.</summary>
     public const int CopiedFeedbackMs = 1000;
     /// <summary>Minimum interval between track switches with the mouse wheel.</summary>
